@@ -20,3 +20,7 @@ func NewExampleExecutor() *ExampleExecutor {
 func (self *ExampleExecutor) Registered(driver exec.ExecutorDriver, execInfo *mesos.ExecutorInfo, fwInfo *mesos.FrameworkInfo, slaveInfo *mesos.SlaveInfo) {
     fmt.Println("Call ExampleExecutor.Registered")
 }
+
+func (self *ExampleExecutor) Reregistered(driver exec.ExecutorDriver, slaveInfo *mesos.SlaveInfo) {
+    fmt.Println("Call ExampleExecutor.Re-registered")
+}
