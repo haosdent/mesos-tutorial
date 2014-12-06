@@ -52,3 +52,8 @@ func (self *ExampleExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *me
         fmt.Println("Got error in ExampleExecutor.LaunchTask: ", err)
     }
 }
+
+func (self *ExampleExecutor) KillTask(exec.ExecutorDriver, *mesos.TaskID) {
+    fmt.Println("Call ExampleExecutor.KillTask")
+}
+
