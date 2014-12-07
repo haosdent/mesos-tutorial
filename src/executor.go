@@ -57,3 +57,8 @@ func (self *ExampleExecutor) KillTask(exec.ExecutorDriver, *mesos.TaskID) {
     fmt.Println("Call ExampleExecutor.KillTask")
 }
 
+func (self *ExampleExecutor) FrameworkMessage(driver exec.ExecutorDriver, msg string) {
+    fmt.Println("Call ExampleExecutor.FrameworkMessage")
+}
+
+func (self *ExampleExecutor)
