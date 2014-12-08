@@ -61,4 +61,6 @@ func (self *ExampleExecutor) FrameworkMessage(driver exec.ExecutorDriver, msg st
     fmt.Println("Call ExampleExecutor.FrameworkMessage")
 }
 
-func (self *ExampleExecutor)
+func (self *ExampleExecutor) Shutdown(exec.ExecutorDriver) {
+    fmt.Println("Call ExampleExecutor.Shutdown")
+}
