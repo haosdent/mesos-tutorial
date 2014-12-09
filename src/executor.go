@@ -64,3 +64,11 @@ func (self *ExampleExecutor) FrameworkMessage(driver exec.ExecutorDriver, msg st
 func (self *ExampleExecutor) Shutdown(exec.ExecutorDriver) {
     fmt.Println("Call ExampleExecutor.Shutdown")
 }
+
+func (self *ExampleExecutor) Error(driver exec.ExecutorDriver, err string) {
+    fmt.Println("Call ExampleExecutor.Error")
+}
+
+func init() {
+    flag.Parse()
+}
