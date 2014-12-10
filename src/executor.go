@@ -38,7 +38,7 @@ func (self *ExampleExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *me
     }
     _, err := driver.SendStatusUpdate(runStatus)
     if err != nil {
-        fmt.Println("Got error in ExampleExecutor.LaunchTask: ", err)
+        fmt.Println("Got error in ExampleExecutor.LaunchTask: ", err.Error())
     }
 
     exec.tasksLaunched++
@@ -49,7 +49,7 @@ func (self *ExampleExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *me
     }
     _, err = driver.SendStatusUpdate(finStatus)
     if err != nil {
-        fmt.Println("Got error in ExampleExecutor.LaunchTask: ", err)
+        fmt.Println("Got error in ExampleExecutor.LaunchTask: ", err.Error())
     }
 }
 
@@ -71,4 +71,25 @@ func (self *ExampleExecutor) Error(driver exec.ExecutorDriver, err string) {
 
 func init() {
     flag.Parse()
+}
+
+func main() {
+    fmt.Println("Start ExampleExecutor")
+
+    dconfig := exec.DriverConfig{
+        Executor: NewExampleExecutor(),
+    }
+    driver, err := exec.NewMesosExecutorDriver(dconfig)
+
+    if err != nil {
+        fmt.Println("Unable to create a ExecutorDriver", err.Error())
+    }
+
+    _, err = driver.Start()
+    if err != nil {
+        fmt.Println("Start ExecutorDriver error", err.Error())
+        return
+    }
+    fmt.Println("Executor process has started and running.")
+    driver.Join()
 }
