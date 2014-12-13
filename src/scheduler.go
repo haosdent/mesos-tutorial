@@ -23,3 +23,12 @@ func NewExampleScheduler(exec *mesos.ExecutorInfo) *ExampleScheduler {
 func (self *ExampleScheduler) Registered(driver sched.SchedulerDriver, frameworkId *mesos.FrameworkID, masterInfo *mesos.MasterInfo) {
     fmt.Printfln("Call ExampleScheduler.Registered")
 }
+
+func (self *ExampleScheduler) Reregistered(driver sched.SchedulerDriver, masterInfo *mesos.MasterInfo) {
+    fmt.Printfln("Call ExampleScheduler.Reregistered")
+}
+
+func (self *ExampleScheduler) Disconnected(sched.SchedulerDriver) {
+    fmt.Printfln("Call ExampleScheduler.Disconnected")
+}
+
