@@ -32,3 +32,52 @@ func (self *ExampleScheduler) Disconnected(sched.SchedulerDriver) {
     fmt.Printfln("Call ExampleScheduler.Disconnected")
 }
 
+func (self *ExampleScheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*mesos.Offer) {
+    fmt.Printfln("Call ExampleScheduler.ResourceOffers")
+    for _, offer := range offers {
+        cpuResources := util.FilterResources(offer.Resources, func(res *mesos.Resource) bool {
+            return res.GetName() == "cpus"
+        })
+        cpus := 0.0
+        for _, res := range cpuResources {
+            cpus += res.GetScalar().GetValue()
+        }
+
+        memResources := util.FilterResources(offer.Resources, func(res *mesos.Resource) bool {
+            return res.GetName() == "mem"
+        })
+        mems := 0.0
+        for _, res := range memResources {
+            mems += res.GetScalar().GetValue()
+        }
+
+        fmt.Printfln("Receive offer, Cpu: ", cpus, ", Mem:", mems)
+
+        remainCpus := cpus
+        remainMems := mems
+
+        var tasks []*mesos.TaskInfo
+
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
