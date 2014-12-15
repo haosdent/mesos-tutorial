@@ -57,7 +57,30 @@ func (self *ExampleScheduler) ResourceOffers(driver sched.SchedulerDriver, offer
         remainMems := mems
 
         var tasks []*mesos.TaskInfo
+        for self.tasksLaunched < self.totalTasks
+          && CPUS_PER_TASK <= remainCpus
+          && MEM_PER_TASK <= remainMems {
+            self.tasksLaunched++
 
+            taskId := &mesos.TaskID{
+                Value: proto.String(strconv.Itoa(self.tasksLaunched))
+            }
+
+            task := &mesos.TaskInfo{
+                Name: proto.String("go-task-" + taskId.GetValue()),
+                TaskId: taskId,
+                SlaveId: offer.SlaveId,
+                Executor: self.executor,
+                Resources: []*mesos.Resource{
+                    util.NewScalarResource("cpus", CPUS_PER_TASK),
+                    util.NewScalarResource("mem", MEM_PER_TASK),
+                },
+            }
+
+            tasks = append(tasks, task)
+            remainMems -= MEM_PER_TASK
+            remainCpus -= CPUS_PER_TASK
+        }
     }
 }
 
