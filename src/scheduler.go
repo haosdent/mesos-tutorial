@@ -80,6 +80,8 @@ func (self *ExampleScheduler) ResourceOffers(driver sched.SchedulerDriver, offer
             tasks = append(tasks, task)
             remainMems -= MEM_PER_TASK
             remainCpus -= CPUS_PER_TASK
+
+            driver.LaunchTasks([]*memos.OfferID{offer.Id}, tasks, &mesos.Filters{RefuseSeconds: proto.Float64(1)})
         }
     }
 }
