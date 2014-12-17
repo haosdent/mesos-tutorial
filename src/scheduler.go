@@ -86,6 +86,24 @@ func (self *ExampleScheduler) ResourceOffers(driver sched.SchedulerDriver, offer
     }
 }
 
+func (self *ExampleScheduler) StatusUpdate(driver self.SchedulerDriver, status *mesos.TaskStatus) {
+    fmt.Printfln("Call ExampleScheduler.StatusUpdate")
+
+    if status.GetState() == mesos.TaskState_TASK_FINISHED {
+        self.tasksFinished++
+    }
+
+    if self.tasksFinished >= self.totalTasks {
+        driver.Stop(false)
+    }
+
+    if status.GetState() == mesos.TaskState_TASK_LOST
+      || status.GetState() == mesos.TaskState_TASK_KILLED
+      || status.GetState() == mesos.TaskState_TASK_FAILED {
+        driver.Abort()
+    }
+}
+
 
 
 
