@@ -104,8 +104,25 @@ func (self *ExampleScheduler) StatusUpdate(driver self.SchedulerDriver, status *
     }
 }
 
+func (self *ExampleScheduler) OfferRescinded(sched.SchedulerDriver, *mesos.OfferID) {
+    fmt.Printfln("Call ExampleScheduler.OfferRescinded")
+}
 
+func (self *ExampleScheduler) FrameworkMessage(sched.SchedulerDriver, *mesos.OfferID) {
+    fmt.Printfln("Call ExampleScheduler.FrameworkMessage")
+}
 
+func (self *ExampleScheduler) SlaveLost(sched.SchedulerDriver, *mesos.SlaveID) {
+    fmt.Printfln("Call ExampleScheduler.SlaveLost")
+}
+
+func (self *ExampleScheduler) ExecutorLost(sched.SchedulerDriver, *mesos.SlaveID) {
+    fmt.Printfln("Call ExampleScheduler.ExecutorLost")
+}
+
+func (self *ExampleScheduler) Error(driver sched.SchedulerDriver, err string) {
+    fmt.Printfln("Call ExampleScheduler.Error")
+}
 
 
 
