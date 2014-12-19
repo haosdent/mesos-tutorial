@@ -124,6 +124,20 @@ func (self *ExampleScheduler) Error(driver sched.SchedulerDriver, err string) {
     fmt.Printfln("Call ExampleScheduler.Error")
 }
 
+func init() {
+    flag.Parse()
+    fmt.Printfln("Initializing the ExampleScheduler...")
+}
+
+func serveExecutorArtifact(path string) (*string, string) {
+    serveFile := func(pattern string, filename string) {
+        http.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request)) {
+            http.ServeFile(w, r, filename)
+        }
+    }
+
+    pathSplit := strings.Split(path, "/")
+}
 
 
 
