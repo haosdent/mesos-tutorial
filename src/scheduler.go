@@ -137,10 +137,40 @@ func serveExecutorArtifact(path string) (*string, string) {
     }
 
     pathSplit := strings.Split(path, "/")
+    var base string
+    if len(pathSplit) > 0 {
+        base = pathSplit[len(pathSplit) - 1]
+    } else {
+        base = path
+    }
+    serveFile("/" + base, path)
+
+    hostUri := fmt.Sprintf("http://%s:%d/%s", *address, *artifactPort, base)
+
+    return &hostUri, base
 }
 
+func prepareExecutorInfo() *mesos.ExecutorInfo {
+    executorUris := []*mesos.CommandInfo_URI{}
+    uri, executorCmd := serveExecutorArtifact(*executorPath)
+    executorUris = append(executorUris, &mesos.CommandInfo_URI{Value: uri, Executable: proto.Bool(true)})
+    executorCommand := fmt.Sprintf("./%s", executorCmd)
 
+    go http.ListenAndServe(fmt.Sprintf("%s:%d", *address, *artifactPort), nil)
+    return &mesos.ExecutorInfo{
+        ExecutorId: util.NewExecutorID("default"),
+        Name:       proto.String("Test Executor (Go)"),
+        Source:     proto.String("go_test"),
+        Command: &mesos.CommandInfo{
+            Value: proto.String(executorCommand),
+            Uris:  executorUris,
+        },
+    }
+}
 
+func parseIP(address string) net.IP {
+
+}
 
 
 
