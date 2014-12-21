@@ -169,7 +169,14 @@ func prepareExecutorInfo() *mesos.ExecutorInfo {
 }
 
 func parseIP(address string) net.IP {
-
+    addr, err := net.LookupIP(address)
+    if err != nil {
+        log.Fatal(err)
+    }
+    if len(addr) < 1 {
+        log.Fatalf("Failed to parse IP from address '%v'", address)
+    }
+    return addr[0]
 }
 
 
