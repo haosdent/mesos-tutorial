@@ -179,7 +179,9 @@ func parseIP(address string) net.IP {
     return addr[0]
 }
 
-
+func main() {
+    exec := prepareExecutorInfo()
+}
 
 
 
