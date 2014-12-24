@@ -181,6 +181,42 @@ func parseIP(address string) net.IP {
 
 func main() {
     exec := prepareExecutorInfo()
+
+    fwinfo := &mesos.FrameworkInfo{
+        User: proto.String(""),
+        Name: proto.String("Test Framework (Go)"),
+    }
+
+    cred := (*mesos.Credential)(nil)
+    if *mesosAuthPrincipal != "" {
+        fwinfo.Principal = proto.String(*mesosAuthPrincipal)
+        secret, err := ioutil.ReadFile(*mesosAuthSecretFile)
+        if err != nil {
+            log.Fatal(err)
+        }
+        cred = &mesos.Credential{
+            Principal: proto.String(*mesosAuthPrincipal),
+            Secret:    secret,
+        }
+    }
+    bindingAddress := parseIP(*address)
+    config := self.DriverConfig{
+        Scheduler:      newExampleScheduler(exec),
+        Framework:      fwinfo,
+        Master:         *master,
+        Credential:     cred,
+        BindingAddress: bindingAddress,
+        WithAuthContext: func(ctx context.Context) context.Context {
+            ctx = auth.WithLoginProvider(ctx, *authProvider)
+            ctx = sasl.WithBindingAddress(ctx, bindingAddress)
+            return ctx
+        },
+    }
+
+    driver, err := self.NewMesosSchedulerDriver(config)
+    if err != nil {
+
+    }
 }
 
 
