@@ -215,7 +215,7 @@ func main() {
 
     driver, err := self.NewMesosSchedulerDriver(config)
     if err != nil {
-
+        log.Fatal("Could not create a SchedulerDriver: ", err.Error())
     }
 }
 
