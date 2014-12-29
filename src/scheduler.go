@@ -217,6 +217,9 @@ func main() {
     if err != nil {
         log.Fatal("Could not create a SchedulerDriver: ", err.Error())
     }
+    if stat, err := driver.Run(); err != nil {
+        log.Fatalf("Stopped with status %s and error %s \n", stat.String(), err.Error())
+    }
 }
 
 
