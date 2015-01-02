@@ -1,5 +1,23 @@
 package main
 
+const (
+    CPUS_PER_TASK       = 1
+    MEM_PER_TASK        = 128
+    defaultArtifactPort = 12345
+)
+
+var (
+    address      = flag.String("address", "127.0.0.1", "Binding address for artifact server")
+    artifactPort = flag.Int("artifactPort", defaultArtifactPort, "Binding port for artifact server")
+    authProvider = flag.String("mesos_authentication_provider", sasl.ProviderName,
+        fmt.Sprintf("Authentication provider to use, default is SASL that supports mechanisms: %+v", mech.ListSupported()))
+    master              = flag.String("master", "127.0.0.1:5050", "Master address <ip:port>")
+    executorPath        = flag.String("executor", "./test_executor", "Path to test executor")
+    taskCount           = flag.String("task-count", "5", "Total task count to run.")
+    mesosAuthPrincipal  = flag.String("mesos_authentication_principal", "", "Mesos authentication principal.")
+    mesosAuthSecretFile = flag.String("mesos_authentication_secret_file", "", "Mesos authentication secret file.")
+)
+
 type ExampleScheduler struct {
     executor      *mesos.ExecutorInfo
     tasksLaunched int
