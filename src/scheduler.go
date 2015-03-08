@@ -5,10 +5,12 @@ import (
     "fmt"
     "io/ioutil"
     "net"
+    "log"
     "net/http"
     "strconv"
     "strings"
 
+    "golang.org/x/net/context"
     "github.com/gogo/protobuf/proto"
     "github.com/mesos/mesos-go/auth"
     "github.com/mesos/mesos-go/auth/sasl"
@@ -57,19 +59,19 @@ func NewExampleScheduler(exec *mesos.ExecutorInfo) *ExampleScheduler {
 }
 
 func (self *ExampleScheduler) Registered(driver sched.SchedulerDriver, frameworkId *mesos.FrameworkID, masterInfo *mesos.MasterInfo) {
-    fmt.Printfln("Call ExampleScheduler.Registered")
+    fmt.Println("Call ExampleScheduler.Registered")
 }
 
 func (self *ExampleScheduler) Reregistered(driver sched.SchedulerDriver, masterInfo *mesos.MasterInfo) {
-    fmt.Printfln("Call ExampleScheduler.Reregistered")
+    fmt.Println("Call ExampleScheduler.Reregistered")
 }
 
 func (self *ExampleScheduler) Disconnected(sched.SchedulerDriver) {
-    fmt.Printfln("Call ExampleScheduler.Disconnected")
+    fmt.Println("Call ExampleScheduler.Disconnected")
 }
 
 func (self *ExampleScheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*mesos.Offer) {
-    fmt.Printfln("Call ExampleScheduler.ResourceOffers")
+    fmt.Println("Call ExampleScheduler.ResourceOffers")
     for _, offer := range offers {
         cpuResources := util.FilterResources(offer.Resources, func(res *mesos.Resource) bool {
             return res.GetName() == "cpus"
@@ -87,19 +89,19 @@ func (self *ExampleScheduler) ResourceOffers(driver sched.SchedulerDriver, offer
             mems += res.GetScalar().GetValue()
         }
 
-        fmt.Printfln("Receive offer, Cpu: ", cpus, ", Mem:", mems)
+        fmt.Println("Receive offer, Cpu: ", cpus, ", Mem:", mems)
 
         remainCpus := cpus
         remainMems := mems
 
         var tasks []*mesos.TaskInfo
-        for self.tasksLaunched < self.totalTasks
-          && CPUS_PER_TASK <= remainCpus
-          && MEM_PER_TASK <= remainMems {
+        for self.tasksLaunched < self.totalTasks &&
+            CPUS_PER_TASK <= remainCpus &&
+            MEM_PER_TASK <= remainMems {
             self.tasksLaunched++
 
             taskId := &mesos.TaskID{
-                Value: proto.String(strconv.Itoa(self.tasksLaunched))
+                Value: proto.String(strconv.Itoa(self.tasksLaunched)),
             }
 
             task := &mesos.TaskInfo{
@@ -117,13 +119,13 @@ func (self *ExampleScheduler) ResourceOffers(driver sched.SchedulerDriver, offer
             remainMems -= MEM_PER_TASK
             remainCpus -= CPUS_PER_TASK
 
-            driver.LaunchTasks([]*memos.OfferID{offer.Id}, tasks, &mesos.Filters{RefuseSeconds: proto.Float64(1)})
+            driver.LaunchTasks([]*mesos.OfferID{offer.Id}, tasks, &mesos.Filters{RefuseSeconds: proto.Float64(1)})
         }
     }
 }
 
-func (self *ExampleScheduler) StatusUpdate(driver self.SchedulerDriver, status *mesos.TaskStatus) {
-    fmt.Printfln("Call ExampleScheduler.StatusUpdate")
+func (self *ExampleScheduler) StatusUpdate(driver sched.SchedulerDriver, status *mesos.TaskStatus) {
+    fmt.Println("Call ExampleScheduler.StatusUpdate")
 
     if status.GetState() == mesos.TaskState_TASK_FINISHED {
         self.tasksFinished++
@@ -133,43 +135,43 @@ func (self *ExampleScheduler) StatusUpdate(driver self.SchedulerDriver, status *
         driver.Stop(false)
     }
 
-    if status.GetState() == mesos.TaskState_TASK_LOST
-      || status.GetState() == mesos.TaskState_TASK_KILLED
-      || status.GetState() == mesos.TaskState_TASK_FAILED {
+    if status.GetState() == mesos.TaskState_TASK_LOST ||
+       status.GetState() == mesos.TaskState_TASK_KILLED ||
+       status.GetState() == mesos.TaskState_TASK_FAILED {
         driver.Abort()
     }
 }
 
 func (self *ExampleScheduler) OfferRescinded(sched.SchedulerDriver, *mesos.OfferID) {
-    fmt.Printfln("Call ExampleScheduler.OfferRescinded")
+    fmt.Println("Call ExampleScheduler.OfferRescinded")
 }
 
-func (self *ExampleScheduler) FrameworkMessage(sched.SchedulerDriver, *mesos.OfferID) {
-    fmt.Printfln("Call ExampleScheduler.FrameworkMessage")
+func (self *ExampleScheduler) FrameworkMessage(sched.SchedulerDriver, *mesos.ExecutorID, *mesos.SlaveID, string) {
+    fmt.Println("Call ExampleScheduler.FrameworkMessage")
 }
 
 func (self *ExampleScheduler) SlaveLost(sched.SchedulerDriver, *mesos.SlaveID) {
-    fmt.Printfln("Call ExampleScheduler.SlaveLost")
+    fmt.Println("Call ExampleScheduler.SlaveLost")
 }
 
-func (self *ExampleScheduler) ExecutorLost(sched.SchedulerDriver, *mesos.SlaveID) {
-    fmt.Printfln("Call ExampleScheduler.ExecutorLost")
+func (self *ExampleScheduler) ExecutorLost(sched.SchedulerDriver, *mesos.ExecutorID, *mesos.SlaveID, int) {
+    fmt.Println("Call ExampleScheduler.ExecutorLost")
 }
 
 func (self *ExampleScheduler) Error(driver sched.SchedulerDriver, err string) {
-    fmt.Printfln("Call ExampleScheduler.Error")
+    fmt.Println("Call ExampleScheduler.Error")
 }
 
 func init() {
     flag.Parse()
-    fmt.Printfln("Initializing the ExampleScheduler...")
+    fmt.Println("Initializing the ExampleScheduler...")
 }
 
 func serveExecutorArtifact(path string) (*string, string) {
     serveFile := func(pattern string, filename string) {
-        http.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request)) {
+        http.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
             http.ServeFile(w, r, filename)
-        }
+        })
     }
 
     pathSplit := strings.Split(path, "/")
@@ -236,8 +238,8 @@ func main() {
         }
     }
     bindingAddress := parseIP(*address)
-    config := self.DriverConfig{
-        Scheduler:      newExampleScheduler(exec),
+    config := sched.DriverConfig{
+        Scheduler:      NewExampleScheduler(exec),
         Framework:      fwinfo,
         Master:         *master,
         Credential:     cred,
@@ -249,7 +251,7 @@ func main() {
         },
     }
 
-    driver, err := self.NewMesosSchedulerDriver(config)
+    driver, err := sched.NewMesosSchedulerDriver(config)
     if err != nil {
         log.Fatal("Could not create a SchedulerDriver: ", err.Error())
     }
