@@ -7,13 +7,13 @@ import (
     mesos "github.com/mesos/mesos-go/mesosproto"
 )
 
-type ExampleExecutor() struct {
+type ExampleExecutor struct {
     tasksLaunched int
 }
 
 func NewExampleExecutor() *ExampleExecutor {
     instance := ExampleExecutor{
-        tasksLaunched: 0
+        tasksLaunched: 0,
     }
     return &instance
 }
@@ -42,7 +42,7 @@ func (self *ExampleExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *me
         fmt.Println("Got error in ExampleExecutor.LaunchTask: ", err.Error())
     }
 
-    exec.tasksLaunched++
+    self.tasksLaunched++
 
     finStatus := &mesos.TaskStatus{
         TaskId: taskInfo.GetTaskId(),
