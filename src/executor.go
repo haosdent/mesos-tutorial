@@ -3,7 +3,9 @@ package main
 import (
     "flag"
     "fmt"
-    exec "github.com/mesos/mesos-go/executor"
+    "os"
+    "os/exec"
+    "github.com/mesos/mesos-go/executor"
     mesos "github.com/mesos/mesos-go/mesosproto"
 )
 
@@ -18,19 +20,19 @@ func NewExampleExecutor() *ExampleExecutor {
     return &instance
 }
 
-func (self *ExampleExecutor) Registered(driver exec.ExecutorDriver, execInfo *mesos.ExecutorInfo, fwInfo *mesos.FrameworkInfo, slaveInfo *mesos.SlaveInfo) {
+func (self *ExampleExecutor) Registered(driver executor.ExecutorDriver, execInfo *mesos.ExecutorInfo, fwInfo *mesos.FrameworkInfo, slaveInfo *mesos.SlaveInfo) {
     fmt.Println("Call ExampleExecutor.Registered")
 }
 
-func (self *ExampleExecutor) Reregistered(driver exec.ExecutorDriver, slaveInfo *mesos.SlaveInfo) {
+func (self *ExampleExecutor) Reregistered(driver executor.ExecutorDriver, slaveInfo *mesos.SlaveInfo) {
     fmt.Println("Call ExampleExecutor.Re-registered")
 }
 
-func (self *ExampleExecutor) Disconnected(exec.ExecutorDriver) {
+func (self *ExampleExecutor) Disconnected(executor.ExecutorDriver) {
     fmt.Println("Call ExampleExecutor.Disconnected")
 }
 
-func (self *ExampleExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *mesos.TaskInfo) {
+func (self *ExampleExecutor) LaunchTask(driver executor.ExecutorDriver, taskInfo *mesos.TaskInfo) {
     fmt.Println("Call ExampleExecutor.LaunchTask")
 
     runStatus := &mesos.TaskStatus{
@@ -44,6 +46,12 @@ func (self *ExampleExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *me
 
     self.tasksLaunched++
 
+    cmd := exec.Command("ls", "/")
+    cmd.Stdin = os.Stdin;
+    cmd.Stdout = os.Stdout;
+    cmd.Stderr = os.Stderr;
+    err = cmd.Run()
+
     finStatus := &mesos.TaskStatus{
         TaskId: taskInfo.GetTaskId(),
         State:  mesos.TaskState_TASK_FINISHED.Enum(),
@@ -54,19 +62,19 @@ func (self *ExampleExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *me
     }
 }
 
-func (self *ExampleExecutor) KillTask(exec.ExecutorDriver, *mesos.TaskID) {
+func (self *ExampleExecutor) KillTask(executor.ExecutorDriver, *mesos.TaskID) {
     fmt.Println("Call ExampleExecutor.KillTask")
 }
 
-func (self *ExampleExecutor) FrameworkMessage(driver exec.ExecutorDriver, msg string) {
+func (self *ExampleExecutor) FrameworkMessage(driver executor.ExecutorDriver, msg string) {
     fmt.Println("Call ExampleExecutor.FrameworkMessage")
 }
 
-func (self *ExampleExecutor) Shutdown(exec.ExecutorDriver) {
+func (self *ExampleExecutor) Shutdown(executor.ExecutorDriver) {
     fmt.Println("Call ExampleExecutor.Shutdown")
 }
 
-func (self *ExampleExecutor) Error(driver exec.ExecutorDriver, err string) {
+func (self *ExampleExecutor) Error(driver executor.ExecutorDriver, err string) {
     fmt.Println("Call ExampleExecutor.Error")
 }
 
@@ -77,10 +85,10 @@ func init() {
 func main() {
     fmt.Println("Start ExampleExecutor")
 
-    dconfig := exec.DriverConfig{
+    dconfig := executor.DriverConfig{
         Executor: NewExampleExecutor(),
     }
-    driver, err := exec.NewMesosExecutorDriver(dconfig)
+    driver, err := executor.NewMesosExecutorDriver(dconfig)
 
     if err != nil {
         fmt.Println("Unable to create a ExecutorDriver", err.Error())
