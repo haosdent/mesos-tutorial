@@ -6,6 +6,7 @@ import (
     "io/ioutil"
     "net"
     "log"
+    _ "time"
     "net/http"
     "strconv"
     "strings"
@@ -32,7 +33,7 @@ var (
     authProvider = flag.String("mesos_authentication_provider", sasl.ProviderName,
         fmt.Sprintf("Authentication provider to use, default is SASL that supports mechanisms: %+v", mech.ListSupported()))
     master              = flag.String("master", "127.0.0.1:5050", "Master address <ip:port>")
-    executorPath        = flag.String("executor", "./test_executor", "Path to test executor")
+    executorPath        = flag.String("executor", "./executor", "Path to test executor")
     taskCount           = flag.String("task-count", "5", "Total task count to run.")
     mesosAuthPrincipal  = flag.String("mesos_authentication_principal", "", "Mesos authentication principal.")
     mesosAuthSecretFile = flag.String("mesos_authentication_secret_file", "", "Mesos authentication secret file.")
@@ -119,13 +120,13 @@ func (self *ExampleScheduler) ResourceOffers(driver sched.SchedulerDriver, offer
             remainMems -= MEM_PER_TASK
             remainCpus -= CPUS_PER_TASK
 
-            driver.LaunchTasks([]*mesos.OfferID{offer.Id}, tasks, &mesos.Filters{RefuseSeconds: proto.Float64(1)})
         }
+        driver.LaunchTasks([]*mesos.OfferID{offer.Id}, tasks, &mesos.Filters{RefuseSeconds: proto.Float64(1)})
     }
 }
 
 func (self *ExampleScheduler) StatusUpdate(driver sched.SchedulerDriver, status *mesos.TaskStatus) {
-    fmt.Println("Call ExampleScheduler.StatusUpdate")
+    fmt.Println("Call ExampleScheduler.StatusUpdate:", status.State.Enum().String())
 
     if status.GetState() == mesos.TaskState_TASK_FINISHED {
         self.tasksFinished++
@@ -193,8 +194,10 @@ func prepareExecutorInfo() *mesos.ExecutorInfo {
     uri, executorCmd := serveExecutorArtifact(*executorPath)
     executorUris = append(executorUris, &mesos.CommandInfo_URI{Value: uri, Executable: proto.Bool(true)})
     executorCommand := fmt.Sprintf("./%s", executorCmd)
+    fmt.Println("Commond:", executorCommand)
 
     go http.ListenAndServe(fmt.Sprintf("%s:%d", *address, *artifactPort), nil)
+
     return &mesos.ExecutorInfo{
         ExecutorId: util.NewExecutorID("default"),
         Name:       proto.String("Test Executor (Go)"),
